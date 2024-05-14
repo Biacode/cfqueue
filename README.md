@@ -110,19 +110,63 @@ Supported operations:
 Add a job to the queue. The job definition can be found below.
 Returns the ID of the job
 
+cURL
+
+```shell
+curl --location --request PUT 'localhost:3000/jobs/enqueue' \
+--header 'Content-Type: application/json' \
+--data '{
+    "Type": "TIME_CRITICAL"
+}'
+```
+
 ### `/jobs/dequeue`
 
 Returns a job from the queue
 Jobs are considered available for Dequeue if the job has not been concluded and has not dequeued already
 
+cURL
+
+```shell
+curl --location --request POST 'localhost:3000/jobs/dequeue' \
+--header 'Content-Type: application/json'
+```
+
 ### `/jobs/{job_id}/conclude`
 
 Provided an input of a job ID, finish execution on the job and consider it done
+
+cURL
+
+```shell
+curl --location --request POST 'localhost:3000/jobs/conclude/1' \
+--header 'Content-Type: application/json'
+```
 
 ### `/jobs/{job_id}`
 
 Given an input of a job ID, get information about a job tracked by the queue
 
 The lifecycle of requests made for a job might look like this:
+
+cURL
+
+```shell
+curl --location 'localhost:3000/jobs/1' \
+--header 'Content-Type: application/json'
+```
+
+### `/jobs/stats`
+
+Collect the current queue and job stats. The output is a tuple with the following
+format (`<queue len>`, `<queued jobs>`, `<in progress jobs>`, `<concluded jobs>`).
+The method is not included in public API as it is used for only debugging purpose.
+
+cURL
+
+```shell
+curl --location 'localhost:3000/jobs/stats' \
+--header 'Content-Type: application/json'
+```
 
 `/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude`
