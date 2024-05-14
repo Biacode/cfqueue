@@ -5,13 +5,20 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post, put};
 use axum::Router;
 use serde::Serialize;
+use tokio::time::Instant;
 use tower_http::trace::TraceLayer;
 
+use crate::repository::job_repository::InMemoryJobRepository;
 use crate::repository::JobRepositoryError;
 use crate::web::controller::{conclude, dequeue, enqueue, find, stats};
-use crate::AppState;
 
 mod controller;
+
+#[derive(Clone)]
+pub struct AppState {
+    pub job_repository: InMemoryJobRepository,
+    pub uptime: Instant,
+}
 
 pub fn build_server(state: AppState) -> Router {
     Router::new()

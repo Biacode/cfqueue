@@ -2,8 +2,7 @@ use axum::extract::{Path, State};
 use serde::{Deserialize, Serialize};
 
 use crate::repository::{Job, JobRepository, JobType};
-use crate::web::{AppError, AppJson};
-use crate::AppState;
+use crate::web::{AppError, AppJson, AppState};
 
 #[derive(Deserialize)]
 pub(super) struct EnqueueRequest {

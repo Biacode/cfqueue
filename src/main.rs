@@ -6,7 +6,8 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 use cfqueue::repository::job_repository::InMemoryJobRepository;
-use cfqueue::{web, AppState};
+use cfqueue::web;
+use cfqueue::web::AppState;
 
 #[derive(Parser, Debug)]
 #[command(
