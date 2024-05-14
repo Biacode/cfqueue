@@ -11,11 +11,52 @@ Supported storages: **In-Memory**
 * Clone [cqueue repository](https://github.com/Biacode/cqueue) `git clone git@github.com:Biacode/cqueue.git`
 * Execute `cargo run` command from within the git repo `cd cqueue && cargo run`
 
+## Using `docker-compose`
+
+Start your application by running
+
+```shell
+docker compose up --build
+```
+
+Your application will be available at http://localhost:3000
+
+You may also customize your container using environment variables.
+
+## Configuring the server
+
+You have two options to configure your server, using cli args and env vars.
+
+### Using CLI
+
+Use `cargo run -- --help` to see all available options
+
+An example command might look like
+
+```shell
+cargo run -- --addr localhost --port 3000 --log-level info
+```
+
+Output
+
+```text
+2024-05-14T11:33:31.678400Z  INFO cfqueue: CFQueue is up and running 🎉🎉🎉🚀🚀🚀
+2024-05-14T11:33:31.678429Z  INFO cfqueue: Listening on [::1]:3000
+```
+
+### Using ENV Vars
+
+Available env vars:
+
+* CFQUEUE_ADDR - Server address.
+* CFQUEUE_PORT - Server port.
+* CFQUEUE_LOG_LEVEL - Root logging level.
+
 # TODO;
 
 * [x] Implement in-memory queue store
 * [x] Add HTTP server capabilities
-* [ ] Add docker support
+* [x] Add docker support
 * [ ] Observability/Monitoring solutions
 * [ ] OpenAPI/Swagger support?
 * [ ] Implement CI/CD pipelines using GitHub actions

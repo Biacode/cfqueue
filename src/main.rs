@@ -16,14 +16,15 @@ use cfqueue::web::AppState;
     long_about = "An extremely simple in-memory job queue implementation."
 )]
 struct Args {
-    /// Name of the person to greet
+    /// Server address.
     #[arg(short, long, default_value_t = String::from("127.0.0.1"))]
     addr: String,
 
-    /// Number of times to greet
+    /// Server port.
     #[arg(short, long, default_value_t = 3000)]
     port: u16,
 
+    /// Root logging level.
     #[arg(short, long, default_value_t = String::from("debug"))]
     log_level: String,
 }
