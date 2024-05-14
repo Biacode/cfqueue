@@ -158,9 +158,7 @@ curl --location 'localhost:3000/jobs/1' \
 
 ### `/jobs/stats`
 
-Collect the current queue and job stats. The output is a tuple with the following
-format (`<queue len>`, `<queued jobs>`, `<in progress jobs>`, `<concluded jobs>`).
-The method is not included in public API as it is used for only debugging purpose.
+Collect the current queue and job stats.
 
 **cURL**
 
