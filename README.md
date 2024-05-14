@@ -52,6 +52,20 @@ Available env vars:
 * CFQUEUE_PORT - Server port.
 * CFQUEUE_LOG_LEVEL - Root logging level.
 
+# Known limitations
+
+At the moment the queue supports only in-memory store and HTTP as transport.
+
+As there is only in-memory store, your ID sequence will reset each time your start the app.
+
+The app doesn't support deployments in replicated mode. Each server instance will maintain its own ID sequence.
+To solve this we may consider introducing "master" server using simple consensus algorithm
+like [Raft](https://en.wikipedia.org/wiki/Raft_(algorithm)) (No! thank you! not Paxos...)
+or [Bully](https://en.wikipedia.org/wiki/Bully_algorithm).
+
+The consumer (dequeue) acts as a basic request/response. We might consider switching to more "interactive" mode. E.g,
+using WebSockets, SSE, Long-Pooling, etc.
+
 # TODO;
 
 * [x] Implement in-memory queue store
@@ -60,11 +74,12 @@ Available env vars:
 * [ ] Observability/Monitoring solutions
 * [ ] OpenAPI/Swagger support?
 * [ ] Implement CI/CD pipelines using GitHub actions
-* [ ] Add command line arg parser to configure app properties. E.g, server port
-* [ ] The app should be configurable with env variables as well (perhaps with higher priority?)
-* [ ] Improve documentation and add examples
+* [x] Add command line arg parser to configure app properties. E.g, server port
+* [x] The app should be configurable with env variables as well (perhaps with higher priority?)
+* [x] Improve documentation and add examples (partially done)
 * [ ] Changelog generator?
 * [ ] Auth support
+* [ ] Add docker publish to GitHub Actions
 
 # Developer notes
 
@@ -77,6 +92,12 @@ Available env vars:
   stuff!!
 * To save some time I borrowed an example server impl
   from [Axum examples](https://github.com/tokio-rs/axum/blob/main/examples/error-handling/src/main.rs)
+* To save some time I decided not to break modules into fine-grained modules or even submodules. This way we might gain
+  some benefits like restricting dependencies for each module, more encapsulation and fluent API, better
+  maintainability, etc.
+* Ideally, the Web layer should have been better decoupled from persistence/repository layer. E.g, separating the
+  structures by adding [DTO](https://en.wikipedia.org/wiki/Data_transfer_object) types for representation layer,
+  introducing some [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregation) concepts, etc.
 
 # API
 
@@ -105,4 +126,3 @@ Given an input of a job ID, get information about a job tracked by the queue
 The lifecycle of requests made for a job might look like this:
 
 `/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude`
-
