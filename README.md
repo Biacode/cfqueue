@@ -168,3 +168,15 @@ curl --location 'localhost:3000/jobs/stats' \
 ```
 
 `/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude`
+
+Git cliff
+
+```shell
+cargo install git-cliff
+```
+
+Generate a changelog
+
+```shell
+git cliff -o --tag <your_tag> CHANGELOG.md
+```
