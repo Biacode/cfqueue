@@ -110,7 +110,7 @@ Supported operations:
 Add a job to the queue. The job definition can be found below.
 Returns the ID of the job
 
-cURL
+**cURL**
 
 ```shell
 curl --location --request PUT 'localhost:3000/jobs/enqueue' \
@@ -125,7 +125,7 @@ curl --location --request PUT 'localhost:3000/jobs/enqueue' \
 Returns a job from the queue
 Jobs are considered available for Dequeue if the job has not been concluded and has not dequeued already
 
-cURL
+**cURL**
 
 ```shell
 curl --location --request POST 'localhost:3000/jobs/dequeue' \
@@ -136,7 +136,7 @@ curl --location --request POST 'localhost:3000/jobs/dequeue' \
 
 Provided an input of a job ID, finish execution on the job and consider it done
 
-cURL
+**cURL**
 
 ```shell
 curl --location --request POST 'localhost:3000/jobs/conclude/1' \
@@ -149,7 +149,7 @@ Given an input of a job ID, get information about a job tracked by the queue
 
 The lifecycle of requests made for a job might look like this:
 
-cURL
+**cURL**
 
 ```shell
 curl --location 'localhost:3000/jobs/1' \
@@ -162,7 +162,7 @@ Collect the current queue and job stats. The output is a tuple with the followin
 format (`<queue len>`, `<queued jobs>`, `<in progress jobs>`, `<concluded jobs>`).
 The method is not included in public API as it is used for only debugging purpose.
 
-cURL
+**cURL**
 
 ```shell
 curl --location 'localhost:3000/jobs/stats' \
