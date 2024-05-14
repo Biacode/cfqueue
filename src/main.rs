@@ -5,7 +5,7 @@ use tokio::time::Instant;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
-use cfqueue::job_repository::InMemoryJobRepository;
+use cfqueue::repository::job_repository::InMemoryJobRepository;
 use cfqueue::{web, AppState};
 
 #[derive(Parser, Debug)]

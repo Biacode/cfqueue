@@ -1,7 +1,7 @@
 use axum::extract::{Path, State};
 use serde::{Deserialize, Serialize};
 
-use crate::job_repository::{Job, JobRepository, JobType};
+use crate::repository::{Job, JobRepository, JobType};
 use crate::web::{AppError, AppJson};
 use crate::AppState;
 

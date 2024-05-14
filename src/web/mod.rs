@@ -7,7 +7,7 @@ use axum::Router;
 use serde::Serialize;
 use tower_http::trace::TraceLayer;
 
-use crate::job_repository::JobRepositoryError;
+use crate::repository::JobRepositoryError;
 use crate::web::controller::{conclude, dequeue, enqueue, find, stats};
 use crate::AppState;
 

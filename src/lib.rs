@@ -1,8 +1,8 @@
 use tokio::time::Instant;
 
-use crate::job_repository::InMemoryJobRepository;
+use crate::repository::job_repository::InMemoryJobRepository;
 
-pub mod job_repository;
+pub mod repository;
 pub mod web;
 
 #[derive(Clone)]
