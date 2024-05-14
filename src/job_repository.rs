@@ -75,7 +75,7 @@ impl InMemoryJobRepository {
     ///
     /// The output is a tuple with the following format (`<queue len>`, `<queued jobs>`, `<in progress jobs>`, `<concluded jobs>`)
     ///
-    /// The method is not included in public API as it is primarily used for debugging purposes.
+    /// The method is not included in public API as it is used for only debugging purpose.
     pub(crate) async fn stats(&self) -> (usize, usize, usize) {
         let jobs = self.jobs.lock().await;
         let job_stats = jobs.values().fold(
