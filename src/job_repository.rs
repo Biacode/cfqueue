@@ -70,6 +70,24 @@ impl InMemoryJobRepository {
             ..Default::default()
         }
     }
+
+    /// Collect the current queue and job stats.
+    ///
+    /// The output is a tuple with the following format (`<queue len>`, `<queued jobs>`, `<in progress jobs>`, `<concluded jobs>`)
+    ///
+    /// The method is not included in public API as it is primarily used for debugging purposes.
+    pub(crate) async fn stats(&self) -> (usize, usize, usize) {
+        let jobs = self.jobs.lock().await;
+        let job_stats = jobs.values().fold(
+            (0usize, 0usize, 0usize),
+            |(queued, in_progress, concluded), job| match job.status {
+                JobStatus::Queued => (queued + 1, in_progress, concluded),
+                JobStatus::InProgress => (queued, in_progress + 1, concluded),
+                JobStatus::Concluded => (queued, in_progress, concluded + 1),
+            },
+        );
+        (job_stats.0, job_stats.1, job_stats.2)
+    }
 }
 
 #[async_trait]
@@ -284,5 +302,29 @@ mod tests {
         assert_eq!(job.id, 1);
         assert_eq!(job.status, JobStatus::Concluded);
         assert_eq!(job.job_type, JobType::TimeCritical);
+    }
+
+    #[tokio::test]
+    async fn test_stats() {
+        let job_repository = InMemoryJobRepository::new();
+        // given
+        job_repository.enqueue(JobType::TimeCritical).await.unwrap();
+        job_repository.enqueue(JobType::TimeCritical).await.unwrap();
+        job_repository.enqueue(JobType::TimeCritical).await.unwrap();
+        job_repository.enqueue(JobType::TimeCritical).await.unwrap();
+        job_repository.enqueue(JobType::TimeCritical).await.unwrap();
+        job_repository.enqueue(JobType::TimeCritical).await.unwrap();
+
+        job_repository.dequeue().await.unwrap();
+        job_repository.dequeue().await.unwrap();
+        let job = job_repository.dequeue().await.unwrap();
+
+        job_repository.conclude(job.id).await.unwrap();
+        // when
+        let (queued, in_progress, concluded) = job_repository.stats().await;
+        // then
+        assert_eq!(queued, 3);
+        assert_eq!(in_progress, 2);
+        assert_eq!(concluded, 1);
     }
 }
