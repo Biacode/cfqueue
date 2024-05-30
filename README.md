@@ -2,10 +2,11 @@
 
 An extremely simple in-memory job queue implementation.
 
-Supported transports: **HTTP**<br>
+Supported transports: **HTTP**
+
 Supported storages: **In-Memory**
 
-# Getting started
+## Getting started
 
 * Install [Rust toolchain](https://www.rust-lang.org/tools/install)
 * Clone [cqueue repository](https://github.com/Biacode/cqueue) `git clone git@github.com:Biacode/cqueue.git`
@@ -22,11 +23,11 @@ docker compose up --build
 Output
 
 ```text
-2024-05-14T11:33:31.678400Z  INFO cfqueue: CFQueue is up and running 🎉🎉🎉🚀🚀🚀
+2024-05-14T11:33:31.678400Z  INFO cfqueue: 🚀🚀🚀CFQueue is up and running🚀🚀🚀
 2024-05-14T11:33:31.678429Z  INFO cfqueue: Listening on [::1]:3000
 ```
 
-Your application will be available at http://localhost:3000
+Your application will be available at <http://localhost:3000>
 
 You may also customize your container using environment variables.
 
@@ -52,7 +53,7 @@ Available env vars:
 * CFQUEUE_PORT - Server port.
 * CFQUEUE_LOG_LEVEL - Root logging level.
 
-# Known limitations
+## Known limitations
 
 Currently, the queue supports only in-memory stores and HTTP as transport.
 
@@ -66,7 +67,7 @@ or [Bully](https://en.wikipedia.org/wiki/Bully_algorithm).
 The consumer (dequeue) acts as a basic request/response. We might consider switching to a more "interactive" mode. E.g.,
 using WebSockets, SSE, Long-Pooling, etc.
 
-# TODO;
+## TODO
 
 * [x] Implement in-memory queue store
 * [x] Add HTTP server capabilities
@@ -83,7 +84,7 @@ using WebSockets, SSE, Long-Pooling, etc.
 * [ ] REST API Rate limiter
 * [x] Cancel job
 
-# Developer notes
+## Developer notes
 
 * Consumers could provide ID in headers, but I thought it could have been more fun. Also, the consumer may
   not know any ID, as we return ID only to the producer.
@@ -100,14 +101,14 @@ benefits like restricting each module's dependencies, providing more encapsulati
   structures by adding [DTO](https://en.wikipedia.org/wiki/Data_transfer_object) types for the representation layer,
   introducing some [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregation) concepts, etc.
 
-# API
+## API
 
 The queue exposes a REST API that producers and consumers perform HTTP requests against in JSON.
 
 A typical scenario could look like
 
 ```text
-`/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude`
+/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude
 ```
 
 Supported operations:
@@ -117,7 +118,7 @@ Supported operations:
 Add a job to the queue. The job definition can be found below.
 Returns the ID of the job
 
-**cURL**
+cURL
 
 ```shell
 curl --location --request PUT 'localhost:3000/jobs/enqueue' \
@@ -132,7 +133,7 @@ curl --location --request PUT 'localhost:3000/jobs/enqueue' \
 Returns a job from the queue
 Jobs are considered available for Dequeue if the job has not been concluded and has not dequeued already
 
-**cURL**
+cURL
 
 ```shell
 curl --location --request POST 'localhost:3000/jobs/dequeue' \
@@ -143,7 +144,7 @@ curl --location --request POST 'localhost:3000/jobs/dequeue' \
 
 Provided an input of a job ID, finish execution on the job and consider it done
 
-**cURL**
+cURL
 
 ```shell
 curl --location --request POST 'localhost:3000/jobs/conclude/1' \
@@ -156,7 +157,7 @@ Given an input of a job ID, get information about a job tracked by the queue
 
 The lifecycle of requests made for a job might look like this:
 
-**cURL**
+cURL
 
 ```shell
 curl --location 'localhost:3000/jobs/1' \
@@ -167,7 +168,7 @@ curl --location 'localhost:3000/jobs/1' \
 
 Collect the current queue and job stats.
 
-**cURL**
+cURL
 
 ```shell
 curl --location 'localhost:3000/jobs/stats' \
@@ -178,7 +179,7 @@ curl --location 'localhost:3000/jobs/stats' \
 
 Cancel the job by ID
 
-**cURL**
+cURL
 
 ```shell
 curl --location --request POST 'localhost:3000/jobs/cancel' \

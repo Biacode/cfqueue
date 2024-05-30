@@ -55,7 +55,7 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", server_addr, server_port))
         .await
         .unwrap();
-    tracing::info!("CFQueue is up and running 🎉🎉🎉🚀🚀🚀");
+    tracing::info!("🚀🚀🚀CFQueue is up and running🚀🚀🚀");
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
 }
