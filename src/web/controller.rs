@@ -18,14 +18,22 @@ pub(super) struct EnqueueResponse {
 
 #[derive(Serialize, Clone)]
 pub(super) struct StatsResponse {
-    #[serde(rename = "Queued")]
+    #[serde(rename = "QUEUED")]
     pub(super) queued: usize,
-    #[serde(rename = "InProgress")]
+    #[serde(rename = "IN_PROGRESS")]
     pub(super) in_progress: usize,
-    #[serde(rename = "Concluded")]
+    #[serde(rename = "CONCLUDED")]
     pub(super) concluded: usize,
-    #[serde(rename = "UptimeMillis")]
+    #[serde(rename = "CANCELLED")]
+    pub(super) cancelled: usize,
+    #[serde(rename = "UPTIME_MILLIS")]
     pub(super) uptime: usize,
+}
+
+#[derive(Deserialize)]
+pub(super) struct CancelJobRequest {
+    #[serde(rename = "ID")]
+    pub(super) id: usize,
 }
 
 pub(super) async fn enqueue(
@@ -57,12 +65,17 @@ pub(super) async fn find(
 pub(super) async fn stats(
     State(state): State<AppState>,
 ) -> Result<AppJson<StatsResponse>, AppError> {
-    let (queued, in_progress, concluded) = state.job_repository.stats().await;
+    let (queued, in_progress, concluded, cancelled) = state.job_repository.stats().await;
     let uptime = state.uptime.elapsed().as_millis() as usize;
     Ok(AppJson(StatsResponse {
         queued,
         in_progress,
         concluded,
+        cancelled,
         uptime,
     }))
+}
+
+pub(super) async fn cancel(State(state): State<AppState>, AppJson(payload): AppJson<CancelJobRequest>) -> Result<AppJson<Job>, AppError> {
+    Ok(AppJson(state.job_repository.cancel(payload.id).await?))
 }

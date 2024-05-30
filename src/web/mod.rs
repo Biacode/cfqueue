@@ -10,7 +10,7 @@ use tower_http::trace::TraceLayer;
 
 use crate::repository::job_repository::InMemoryJobRepository;
 use crate::repository::JobRepositoryError;
-use crate::web::controller::{conclude, dequeue, enqueue, find, stats};
+use crate::web::controller::{cancel, conclude, dequeue, enqueue, find, stats};
 
 mod controller;
 
@@ -27,6 +27,7 @@ pub fn build_server(state: AppState) -> Router {
         .route("/jobs/conclude/:job_id", post(conclude))
         .route("/jobs/:job_id", get(find))
         .route("/jobs/stats", get(stats))
+        .route("/jobs/cancel", post(cancel))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|req: &Request| {

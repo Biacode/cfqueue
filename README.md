@@ -19,6 +19,13 @@ Start your application by running
 docker compose up --build
 ```
 
+Output
+
+```text
+2024-05-14T11:33:31.678400Z  INFO cfqueue: CFQueue is up and running 🎉🎉🎉🚀🚀🚀
+2024-05-14T11:33:31.678429Z  INFO cfqueue: Listening on [::1]:3000
+```
+
 Your application will be available at http://localhost:3000
 
 You may also customize your container using environment variables.
@@ -35,13 +42,6 @@ An example command might look like
 
 ```shell
 cargo run -- --addr localhost --port 3000 --log-level info
-```
-
-Output
-
-```text
-2024-05-14T11:33:31.678400Z  INFO cfqueue: CFQueue is up and running 🎉🎉🎉🚀🚀🚀
-2024-05-14T11:33:31.678429Z  INFO cfqueue: Listening on [::1]:3000
 ```
 
 ### Using ENV Vars
@@ -77,13 +77,15 @@ using WebSockets, SSE, Long-Pooling, etc.
 * [x] Add command line arg parser to configure app properties. E.g, server port
 * [x] The app should be configurable with env variables as well (perhaps with higher priority?)
 * [x] Improve documentation and add examples (partially done)
-* [ ] Changelog generator?
+* [x] Changelog generator?
 * [ ] Auth support
 * [ ] Add docker publish to GitHub Actions
+* [ ] REST API Rate limiter
+* [x] Cancel job
 
 # Developer notes
 
-* I know the requirement says consumer provides ID in headers, but I thought it isn't much fun. Also, the consumer may
+* Consumer could provides ID in headers, but I thought it isn't much fun. Also, the consumer may
   not know any ID, as we return ID only to producer.
 * As this is an in-memory store and everything will purged after restart, I don't really care about keeping the ID
   sequence.
@@ -102,6 +104,12 @@ using WebSockets, SSE, Long-Pooling, etc.
 # API
 
 The queue exposes a REST API that producers and consumers perform HTTP requests against in JSON.
+
+A typical scenario could look like
+
+```text
+`/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude`
+```
 
 Supported operations:
 
@@ -167,9 +175,21 @@ curl --location 'localhost:3000/jobs/stats' \
 --header 'Content-Type: application/json'
 ```
 
-`/jobs/enqueue -> /jobs/dequeue -> /jobs/{job_id}/conclude`
+### `/jobs/cancel`
 
-Git cliff
+Cancel the job by ID
+
+**cURL**
+
+```shell
+curl --location --request POST 'localhost:3000/jobs/cancel' \
+--header 'Content-Type: application/json' \
+--data '{
+    "ID": 1
+}'
+```
+
+### Git cliff
 
 ```shell
 cargo install git-cliff

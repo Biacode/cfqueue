@@ -30,6 +30,8 @@ pub enum JobStatus {
     InProgress,
     #[serde(rename = "CONCLUDED")]
     Concluded,
+    #[serde(rename = "CANCELLED")]
+    Cancelled,
 }
 
 #[derive(Debug, Error, Serialize, Deserialize, PartialEq, Clone)]
@@ -54,4 +56,6 @@ pub trait JobRepository {
     async fn conclude(&self, id: usize) -> Result<Job, JobRepositoryError>;
     /// Given an input of a job ID, get information about a job tracked by the queue
     async fn find(&self, id: usize) -> Result<Job, JobRepositoryError>;
+    /// Given an input of a job ID, get information about a job tracked by the queue
+    async fn cancel(&self, id: usize) -> Result<Job, JobRepositoryError>;
 }

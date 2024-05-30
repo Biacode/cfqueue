@@ -1,9 +1,10 @@
 use std::collections::{HashMap, VecDeque};
 use std::sync::Arc;
 
-use crate::repository::{Job, JobRepository, JobRepositoryError, JobStatus, JobType};
 use async_trait::async_trait;
 use tokio::sync::Mutex;
+
+use crate::repository::{Job, JobRepository, JobRepositoryError, JobStatus, JobType};
 
 #[derive(Default, Clone)]
 pub struct InMemoryJobRepository {
@@ -23,17 +24,18 @@ impl InMemoryJobRepository {
     /// The output is a tuple with the following format (`<queue len>`, `<queued jobs>`, `<in progress jobs>`, `<concluded jobs>`)
     ///
     /// The method is not included in public API as it is used for only debugging purpose.
-    pub(crate) async fn stats(&self) -> (usize, usize, usize) {
+    pub(crate) async fn stats(&self) -> (usize, usize, usize, usize) {
         let jobs = self.jobs.lock().await;
         let job_stats = jobs.values().fold(
-            (0usize, 0usize, 0usize),
-            |(queued, in_progress, concluded), job| match job.status {
-                JobStatus::Queued => (queued + 1, in_progress, concluded),
-                JobStatus::InProgress => (queued, in_progress + 1, concluded),
-                JobStatus::Concluded => (queued, in_progress, concluded + 1),
+            (0usize, 0usize, 0usize, 0usize),
+            |(queued, in_progress, concluded, cancelled), job| match job.status {
+                JobStatus::Queued => (queued + 1, in_progress, concluded, cancelled),
+                JobStatus::InProgress => (queued, in_progress + 1, concluded, cancelled),
+                JobStatus::Concluded => (queued, in_progress, concluded + 1, cancelled),
+                JobStatus::Cancelled => (queued, in_progress, concluded, cancelled + 1),
             },
         );
-        (job_stats.0, job_stats.1, job_stats.2)
+        (job_stats.0, job_stats.1, job_stats.2, job_stats.3)
     }
 }
 
@@ -88,6 +90,30 @@ impl JobRepository for InMemoryJobRepository {
             .get(&id)
             .cloned()
             .ok_or(JobRepositoryError::NotFound(id))
+    }
+
+    async fn cancel(&self, id: usize) -> Result<Job, JobRepositoryError> {
+        let mut queue = self.queue.lock().await;
+        let ids: Vec<usize> = queue
+            .iter()
+            .filter(|job| job.status == JobStatus::Cancelled)
+            .enumerate()
+            .map(|(idx, _)| idx)
+            .collect();
+        ids.iter().for_each(|idx| {
+            queue.remove(*idx);
+        });
+        let mut jobs = self.jobs.lock().await;
+        return match jobs.get_mut(&id) {
+            None => Err(JobRepositoryError::NotFound(id)),
+            Some(job) => match job.status {
+                JobStatus::Queued | JobStatus::InProgress => {
+                    job.status = JobStatus::Cancelled;
+                    Ok(job.clone())
+                }
+                _ => Err(JobRepositoryError::InvalidStatus(id)),
+            },
+        };
     }
 }
 
@@ -265,10 +291,50 @@ mod tests {
 
         job_repository.conclude(job.id).await.unwrap();
         // when
-        let (queued, in_progress, concluded) = job_repository.stats().await;
+        let (queued, in_progress, concluded, cancelled) = job_repository.stats().await;
         // then
         assert_eq!(queued, 3);
         assert_eq!(in_progress, 2);
         assert_eq!(concluded, 1);
+        assert_eq!(cancelled, 0);
+    }
+
+    #[tokio::test]
+    async fn test_cancel_when_job_status_is_queued() {
+        // given
+        let job_repository = InMemoryJobRepository::new();
+        let _ = job_repository.enqueue(JobType::TimeCritical).await;
+        let _ = job_repository.enqueue(JobType::TimeCritical).await;
+        let _ = job_repository.enqueue(JobType::TimeCritical).await;
+        let job = job_repository
+            .enqueue(JobType::NotTimeCritical)
+            .await
+            .unwrap();
+        // when
+        let cancelled_job = job_repository.cancel(job.id).await.unwrap();
+        // then
+        assert_eq!(job.id, cancelled_job.id);
+        assert_eq!(job.job_type, cancelled_job.job_type);
+        assert_eq!(JobStatus::Cancelled, cancelled_job.status);
+    }
+
+    #[tokio::test]
+    async fn test_cancel_when_job_status_is_in_progress() {
+        // given
+        let job_repository = InMemoryJobRepository::new();
+        let _ = job_repository.enqueue(JobType::TimeCritical).await;
+        let _ = job_repository.enqueue(JobType::TimeCritical).await;
+        let _ = job_repository.enqueue(JobType::TimeCritical).await;
+        let job = job_repository
+            .enqueue(JobType::NotTimeCritical)
+            .await
+            .unwrap();
+        let dequeued_job = job_repository.dequeue().await.unwrap();
+        // when
+        let cancelled_job = job_repository.cancel(dequeued_job.id).await.unwrap();
+        // then
+        assert_eq!(job.id, cancelled_job.id);
+        assert_eq!(job.job_type, cancelled_job.job_type);
+        assert_eq!(JobStatus::Cancelled, cancelled_job.status);
     }
 }
