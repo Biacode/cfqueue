@@ -54,16 +54,16 @@ Available env vars:
 
 # Known limitations
 
-At the moment the queue supports only in-memory store and HTTP as transport.
+Currently, the queue supports only in-memory stores and HTTP as transport.
 
-As there is only in-memory store, your ID sequence will reset each time your start the app.
+There is only an in-memory store, so your ID sequence will reset each time you start the app.
 
-The app doesn't support deployments in replicated mode. Each server instance will maintain its own ID sequence.
-To solve this we may consider introducing "master" server using simple consensus algorithm
+The app doesn't support deployments in replicated mode. Each server instance will maintain its ID sequence.
+To solve this, we may consider introducing a "master" server using a simple consensus algorithm
 like [Raft](https://en.wikipedia.org/wiki/Raft_(algorithm)) (No! thank you! not Paxos...)
 or [Bully](https://en.wikipedia.org/wiki/Bully_algorithm).
 
-The consumer (dequeue) acts as a basic request/response. We might consider switching to more "interactive" mode. E.g,
+The consumer (dequeue) acts as a basic request/response. We might consider switching to a more "interactive" mode. E.g.,
 using WebSockets, SSE, Long-Pooling, etc.
 
 # TODO;
@@ -75,7 +75,7 @@ using WebSockets, SSE, Long-Pooling, etc.
 * [ ] OpenAPI/Swagger support?
 * [ ] Implement CI/CD pipelines using GitHub actions
 * [x] Add command line arg parser to configure app properties. E.g, server port
-* [x] The app should be configurable with env variables as well (perhaps with higher priority?)
+* [x] The app should also be configurable with env variables (perhaps with higher priority?)
 * [x] Improve documentation and add examples (partially done)
 * [x] Changelog generator?
 * [ ] Auth support
@@ -85,20 +85,19 @@ using WebSockets, SSE, Long-Pooling, etc.
 
 # Developer notes
 
-* Consumer could provides ID in headers, but I thought it isn't much fun. Also, the consumer may
-  not know any ID, as we return ID only to producer.
-* As this is an in-memory store and everything will purged after restart, I don't really care about keeping the ID
+* Consumers could provide ID in headers, but I thought it could have been more fun. Also, the consumer may
+  not know any ID, as we return ID only to the producer.
+* As this is an in-memory store and everything will purged after restart, I don't care about keeping the ID
   sequence.
-* At first, I was keeping AtomicUsize for ID counter, then I changed it to actual size of the `jobs` map.
-* The fun part is, we may discuss the "ID thing" for quite some time. Sharding/Partitioning, Replication, LB? cool
+* Initially, I kept AtomicUsize for the ID counter, then changed it to the actual size of the `jobs` map.
+* The fun part is we may discuss the "ID thing" for quite some time. Sharding/Partitioning, Replication, LB? Cool
   stuff!!
-* To save some time I borrowed an example server impl
+* To save some time, I borrowed an example server impl
   from [Axum examples](https://github.com/tokio-rs/axum/blob/main/examples/error-handling/src/main.rs)
-* To save some time I decided not to break modules into fine-grained modules or even submodules. This way we might gain
-  some benefits like restricting dependencies for each module, more encapsulation and fluent API, better
-  maintainability, etc.
-* Ideally, the Web layer should have been better decoupled from persistence/repository layer. E.g, separating the
-  structures by adding [DTO](https://en.wikipedia.org/wiki/Data_transfer_object) types for representation layer,
+* To save some time, I decided not to break modules into fine-grained modules or even submodules. This way, we might gain
+benefits like restricting each module's dependencies, providing more encapsulation and fluent API, better maintainability, etc.
+* Ideally, the Web layer should have been better decoupled from the persistence/repository layer. E.g., separating the
+  structures by adding [DTO](https://en.wikipedia.org/wiki/Data_transfer_object) types for the representation layer,
   introducing some [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregation) concepts, etc.
 
 # API
